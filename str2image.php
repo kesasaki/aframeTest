@@ -5,9 +5,10 @@ if ($text == null) {
     $text = "";
 } else {
     $text = html_entity_decode($text);
+    $chunked = explode(' ', $text);
+    $text    = join("\n\n", $chunked);
 }
-$chunked = explode(' ', $text);
-$text    = join("\n\n", $chunked);
+
 
 $font = './ume-tmo3.ttf';
 
@@ -48,20 +49,46 @@ imagedestroy($im);
       <a-assets>
         <img id="lake" src="lake.jpg">
         <img id="pdx" src="./monolith.png">
-        <audio id="wave" src="./wave_guiter.ogg"></audio>
       </a-assets>
       <a-sky src="#lake"></a-sky>
       <a-image src="#pdx" width="15" height="10" position="0 1.2 1.2" scale="0.3 0.3 0.3"></a-image>
       <a-entity id="wave_sound" sound="autoplay: true; src: ./wave_guiter.ogg; loop: true; on: pause;"></a-entity>
     </a-scene>
-<script type="text/javascript">
-  var entity = document.querySelector('#wave_sound');
-  entity.play();
-document.addEventListener("touchend",TouchEventFunc);
-        function TouchEventFunc(e){
-  var entity = document.querySelector('#wave_sound');
-  entity.play();
+    <div>
+      <audio controls preload="metadata" id="audio" style="display:none;">
+        <source src="wave_guiter.wav" type="audio/x-wav"/>
+      </audio>
+    </div>
+  </div>
+  <script type="text/javascript">
+    var entity = document.querySelector('#audio');
+    var isPlay = false;
+
+    // タップで開始／停止
+    document.addEventListener("touchend", function(e){
+        if (!isPlay) {
+            entity.play();
+            isPlay = true;
+        } else {
+            entity.pause();
+            isPlay = false;
         }
-</script>
-  </body>
+    });
+
+    // 画面を閉じたら止める1
+    document.addEventListener('visibilitychange', function(){
+        if (document.visibilityState === 'hidden'){
+            entity.pause();
+        }else if(document.visibilityState === 'visible'){
+            entity.play();
+        }
+    }, false);
+
+    // ループ
+    entity.addEventListener('ended', function() {
+        this.currentTime = 0;
+        this.play();
+    });
+  </script>
+</body>
 </html>
